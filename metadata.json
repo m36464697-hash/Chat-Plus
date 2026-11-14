@@ -1,0 +1,6 @@
+{
+  "name": "Chat Plus",
+  "description": "منصة محادثات مشفرة واحترافية توفر غرف دردشة برموز سرية، رسائل صوتية، وسائط وملف شخصي متكامل بأعلى معايير الخصوصية والأمان.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

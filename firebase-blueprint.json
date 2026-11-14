@@ -1,0 +1,406 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private user account profile, preferences, and identity details stored for the authenticated user.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Firebase Auth UID",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full display name",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "username": {
+          "type": "string",
+          "description": "Unique handle",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\.\\-]+$"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Profile picture URL or compressed Data URL",
+          "maxLength": 500000
+        },
+        "bio": {
+          "type": "string",
+          "description": "User bio",
+          "maxLength": 300
+        },
+        "status": {
+          "type": "string",
+          "enum": ["online", "busy", "away", "offline"]
+        },
+        "statusMessage": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 160
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "preferences": {
+          "type": "object",
+          "description": "Theme, accent color, bubble style, font size, privacy, notifications, wallpapers, and chat behavior settings"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "name", "username", "avatar", "status", "email", "preferences", "createdAt", "updatedAt"]
+    },
+    "JoinedChatRef": {
+      "title": "JoinedChatRef",
+      "description": "Index entry under a user's private subcollection pointing to a joined chat room.",
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "member"]
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["chatId", "userId", "role", "joinedAt"]
+    },
+    "RoomCodeLookup": {
+      "title": "RoomCodeLookup",
+      "description": "Maps a secret invite code to a chat room ID so users possessing the code can join.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 32,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "chatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["code", "chatId", "createdBy", "createdAt"]
+    },
+    "ChatRoom": {
+      "title": "ChatRoom",
+      "description": "End-to-end encrypted chat room or direct conversation.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "code": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 32,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "isGroup": {
+          "type": "boolean"
+        },
+        "avatar": {
+          "type": "string",
+          "maxLength": 500000
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdByName": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "membersCount": {
+          "type": "number"
+        },
+        "isEncrypted": {
+          "type": "boolean"
+        },
+        "encryptionSalt": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 128
+        },
+        "pinnedMessageId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "lastMessage": {
+          "type": "object",
+          "description": "Latest message preview including optional isEncrypted and iv ciphertext fields"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "code", "title", "isGroup", "createdBy", "membersCount", "isEncrypted", "encryptionSalt", "createdAt", "updatedAt"]
+    },
+    "ChatMember": {
+      "title": "ChatMember",
+      "description": "Membership record stored as a subcollection under each chat room.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "chatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "username": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\.\\-]+$"
+        },
+        "avatar": {
+          "type": "string",
+          "maxLength": 500000
+        },
+        "bio": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "status": {
+          "type": "string",
+          "enum": ["online", "busy", "away", "offline"]
+        },
+        "statusMessage": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "member"]
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastActiveAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "chatId", "name", "role", "joinedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Encrypted message, media, file, or voice note inside a chat room.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "chatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "senderAvatar": {
+          "type": "string",
+          "maxLength": 500000
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "image", "file", "audio", "system"]
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 20000
+        },
+        "isEncrypted": {
+          "type": "boolean"
+        },
+        "iv": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "mediaUrl": {
+          "type": "string",
+          "maxLength": 850000
+        },
+        "fileName": {
+          "type": "string",
+          "maxLength": 255
+        },
+        "fileSize": {
+          "type": "number"
+        },
+        "fileType": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "audioDuration": {
+          "type": "number"
+        },
+        "replyTo": {
+          "type": "object"
+        },
+        "reactions": {
+          "type": "object"
+        },
+        "isPinned": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["sent", "delivered", "read"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "chatId", "senderId", "senderName", "type", "content", "isEncrypted", "reactions", "status", "createdAt"]
+    },
+    "TypingState": {
+      "title": "TypingState",
+      "description": "Ephemeral typing indicator state for a member in a chat room.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "isTyping": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "userName", "isTyping", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Authenticated user's private profile, preferences, and PII."
+    },
+    "/users/{userId}/joinedChats/{chatId}": {
+      "schema": { "$ref": "#/entities/JoinedChatRef" },
+      "description": "User's personal list of joined chat room references."
+    },
+    "/roomCodes/{code}": {
+      "schema": { "$ref": "#/entities/RoomCodeLookup" },
+      "description": "Invite code lookup table mapping room code to chatId."
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/ChatRoom" },
+      "description": "Encrypted chat room metadata."
+    },
+    "/chats/{chatId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/ChatMember" },
+      "description": "Subcollection of authorized members in a chat room."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Subcollection of encrypted messages inside a chat room."
+    },
+    "/chats/{chatId}/typing/{userId}": {
+      "schema": { "$ref": "#/entities/TypingState" },
+      "description": "Subcollection of active typing indicators inside a chat room."
+    }
+  }
+}

@@ -1,0 +1,111 @@
+/**
+ * Security Rules Unit Verification Spec (Dirty Dozen Payloads)
+ * Verifies identity, integrity, PII isolation, and state locks against DRAFT_firestore.rules / firestore.rules.
+ */
+
+export const DIRTY_DOZEN_TEST_CASES = [
+  {
+    name: '1. Unauthenticated user read on /users/{uid}',
+    path: '/users/userA',
+    operation: 'get',
+    auth: null,
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '2. Cross-user PII read on /users/{otherUid}',
+    path: '/users/userB',
+    operation: 'get',
+    auth: { uid: 'userA', email_verified: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '3. Users collection list scrape',
+    path: '/users',
+    operation: 'list',
+    auth: { uid: 'userA', email_verified: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '4. Shadow field injection (isAdmin: true) on user creation',
+    path: '/users/userA',
+    operation: 'create',
+    auth: { uid: 'userA', email_verified: true },
+    payload: { id: 'userA', name: 'Test', username: 'test_u', avatar: '', status: 'online', email: 'a@b.com', preferences: {}, isAdmin: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '5. Unverified email write blocked on chat creation',
+    path: '/chats/chat1',
+    operation: 'create',
+    auth: { uid: 'userA', email_verified: false },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '6. Sender spoofing in message create',
+    path: '/chats/chat1/messages/msg1',
+    operation: 'create',
+    auth: { uid: 'userA', email_verified: true },
+    payload: { id: 'msg1', chatId: 'chat1', senderId: 'userB', senderName: 'Spoof', type: 'text', content: 'hi', isEncrypted: false, reactions: {}, status: 'sent' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '7. Non-member message list blocked',
+    path: '/chats/chat1/messages',
+    operation: 'list',
+    auth: { uid: 'outsiderUser', email_verified: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '8. Secret room code list enumeration blocked',
+    path: '/roomCodes',
+    operation: 'list',
+    auth: { uid: 'userA', email_verified: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '9. Self-assigned owner role escalation on room join',
+    path: '/chats/chat1/members/userB',
+    operation: 'create',
+    auth: { uid: 'userB', email_verified: true },
+    payload: { userId: 'userB', chatId: 'chat1', name: 'Attacker', role: 'owner' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '10. Immutable field tampering (createdBy / encryptionSalt) on chat update',
+    path: '/chats/chat1',
+    operation: 'update',
+    auth: { uid: 'userA', email_verified: true },
+    payload: { createdBy: 'userB', encryptionSalt: 'hacked' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '11. Resource poisoning oversized ID',
+    path: `/chats/${'x'.repeat(250)}`,
+    operation: 'create',
+    auth: { uid: 'userA', email_verified: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '12. Client-forged timestamp bypassing request.time',
+    path: '/chats/chat1/messages/msg2',
+    operation: 'create',
+    auth: { uid: 'userA', email_verified: true },
+    payload: { createdAt: '2020-01-01T00:00:00Z' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '13. Outsider blocked from listing room member directory',
+    path: '/chats/chat1/members',
+    operation: 'list',
+    auth: { uid: 'outsiderUser', email_verified: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: '14. Member presence spoof for another member blocked',
+    path: '/chats/chat1/members/userB',
+    operation: 'update',
+    auth: { uid: 'userA', email_verified: true },
+    payload: { status: 'offline' },
+    expected: 'PERMISSION_DENIED',
+  },
+];
