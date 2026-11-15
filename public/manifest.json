@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "Chat Plus - شات بلس",
+  "short_name": "Chat Plus",
+  "description": "منصة محادثات مشفرة واحترافية توفر غرف دردشة برموز سرية، رسائل صوتية، وسائط وملف شخصي متكامل بأعلى معايير الخصوصية والأمان.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07090E",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
